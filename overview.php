@@ -43,7 +43,9 @@ if ($mysql_connection != false)
                               "`stone`,\n".
                               "`coal`,\n".
                               "`iron`,\n".
-                              "`gold`\n".
+                              "`gold`,\n".
+                              "`soldiers`,\n".
+                              "`cavaliers`\n".
                               "FROM `user_resource`\n".
                               "WHERE `user_id`=".$_SESSION['user_id']."\n");
 }
@@ -175,7 +177,9 @@ if (is_array($resources) === true)
          "Stone: ".$resources['stone'].",\n".
          "Coal: ".$resources['coal'].",\n".
          "Iron: ".$resources['iron'].",\n".
-         "Gold: ".$resources['gold'].".\n".
+         "Gold: ".$resources['gold'].",\n".
+         "Soldiers: ".$resources['soldiers'].",\n".
+         "Cavaliers: ".$resources['cavaliers'].".\n".
          "</td>\n".
          "</tr>\n";
 }
@@ -214,11 +218,7 @@ if ($market === true)
 
 if ($barracks === true)
 {
-    echo "<a href=\"barracks.php\">Barracks</a><br />\n".
-         "<br>\n".
-    "Army: <br />\n".
-    "Soldiers: ".$soldier."<br />\n".
-    "Cavaliers: ".$cavalier."<br />\n";
+    echo "Barracks <br />\n";
 
 }
 
@@ -257,6 +257,26 @@ if (is_array($building) === true)
         }
     }
 }
+
+if (is_array($building) === true)
+{
+    foreach ($building as $g)
+    {
+        //if a market is present -> two buttons
+        if ($g['building'] == ENUM_BUILDING_BARRACKS)
+        {
+            echo "<br />\n".
+                 "<a href=\"attack.php\">Attack</a><br />\n";
+
+            break;
+        }
+    }
+}
+
+
+
+
+
 
 echo "    </td>\n".
      "</tr>\n".

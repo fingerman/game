@@ -114,7 +114,7 @@ else
 
     if (is_array($user) === true)
     {
-        // Update the Us
+        // Update the User
 
         require_once("game.inc.php");
 

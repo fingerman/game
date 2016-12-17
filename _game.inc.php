@@ -191,7 +191,9 @@ function updateUser($userID)
                               " `stone`,\n".
                               " `coal`,\n".
                               " `iron`,\n".
-                              " `gold`\n".
+                              " `gold`,\n".
+                              " `soldiers`,\n".
+                              " `cavaliers`\n".
                               "FROM `user_resource`\n".
                               "WHERE `user_id`=".$userID."\n");
 
@@ -235,6 +237,8 @@ function updateUser($userID)
     $farms = 0;
     $woodmans = 0;
     $miners = 0;
+    $soldiers = 0;
+    $cavaliers = 0;
 
     foreach ($building as $oneBuilding)
     {
@@ -258,12 +262,20 @@ function updateUser($userID)
         case ENUM_BUILDING_MINERS:
             $miners += $dayDiffer;
             break;
+        case ENUM_BUILDING_SOLDIER:
+            $soldiers += $dayDiffer;
+            break;
+        case ENUM_BUILDING_CAVALIER:
+            $cavaliers += $dayDiffer;
+            break;
         }
     }
 
     $food = $resources['food'];
     $wood = $resources['wood'];
     $stone = $resources['stone'];
+    $soldiers = $resources['soldiers'];
+    $cavaliers = $resources['cavaliers'];
     // farm brings 2 Food so we multiply it with the number of farms
     $food += 2 * $farms;
 
@@ -293,11 +305,38 @@ function updateUser($userID)
             break;
         }
     }
+
+    for ($i = 0; $i < $soldiers; $i++)
+    {
+        if ($food > 0)
+        {
+            $food -= 1;
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    for ($i = 0; $i < $cavaliers; $i++)
+    {
+        if ($food > 0 && $wood >0)
+        {
+            $food -= 1;
+            $wood -= 1;
+        }
+        else
+        {
+            break;
+        }
+    }
     // ... and put them in the DB
     if (mysqli_query($mysql_connection, "UPDATE `user_resource`\n".
                     "SET `food`=".$food.",\n".
                     " `wood`=".$wood.",\n".
                     " `stone`=".$stone."\n".
+                    " `soldiers`=".$soldiers."\n".
+                    " `cavaliers`=".$cavaliers."\n".
                     "WHERE `user_id`=".$userID."\n") !== true)
     {
         mysqli_query($mysql_connection, "ROLLBACK");
@@ -307,8 +346,10 @@ function updateUser($userID)
     // deduce the current state from the new, so we have minus or plus
     $messages[] = "Created resources: ".
                   sprintf("%+d", $food - $resources['food'])." Food, ".
-                  sprintf("%+d", $wood - $resources['wood'])." Wood and ".
-                  sprintf("%+d", $stone - $resources['stone'])." Stone.";
+                  sprintf("%+d", $wood - $resources['wood'])." Wood, ".
+                  sprintf("%+d", $stone - $resources['stone'])." Stone.".
+                  sprintf("%+d", $soldiers - $resources['soldiers'])." Soldiers and ".
+                  sprintf("%+d", $cavaliers - $resources['cavaliers'])." Cavaliers.";
 
     // record that the resources have been read out and taken
     if (mysqli_query($mysql_connection, "UPDATE `building`\n".
@@ -813,7 +854,7 @@ function sendResources($userID, $quantity, $resourceArt, $receiver, $sender = NU
         // constant value
         return -4;
     }
-    //if up to now fine, than check the resources of the user ...
+    //if up to now fine, then check the resources of the user ...
     $resources = mysqli_query($mysql_connection, "SELECT `".$resourceArt."`".
                               "FROM `user_resource`\n".
                               "WHERE `user_id`=".$userID."\n");
@@ -1191,7 +1232,6 @@ function removeAllMessages($userID)
     return 0;
 }
 
-
 function attackerArmy($userID)
 {
     require_once("database.inc.php");
@@ -1255,5 +1295,9 @@ function opponentArmy($opponentName)
     }
     return $resOpp;
 }
+
+
+
+
 
 ?>
